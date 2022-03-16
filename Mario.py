@@ -21,13 +21,13 @@ def player_animation():
         if player_index >= len(player_walk):player_index = 0
         player_surface = player_walk[int(player_index)]
 
-def fps():
-    fp=str(int(clock.get_fps()))
-    sc=text_font.render(f'FPS: {fp}',False,(255,255,255))
-    sc_rect=sc.get_rect(topleft=(100,100))
-    map.blit(sc,sc_rect)
+def update_fps():
+	fps = str(int(clock.get_fps()))
+	fps_text = font.render(fps, 1, pygame.Color("white"))
+	return fps_text
 
 pygame.init()
+font = pygame.font.SysFont("Arial", 18)
 screen = pygame.display.set_mode((550,280))
 game_active = False
 pygame.display.set_caption("Super Mario Runner")
@@ -44,6 +44,7 @@ jump_music = pygame.mixer.Sound('Audio/resources_sound_small_jump.ogg')
 victory_music = pygame.mixer.Sound('Audio/resources_music_stage_clear.wav')
 
 text_font = pygame.font.Font('Fonts/Fixedsys500c.ttf',50)
+
 player_gravity = 0
 start_timer = 0
 score = 0
@@ -51,7 +52,6 @@ logo = pygame.image.load('Icon/Logo-removebg-preview.png').convert_alpha()
 logo_rect = logo.get_rect(center=(280,100))
 current_time = (pygame.time.get_ticks() // 1000) - start_timer
 player_change = 0
-#fireball_left=0
 map_change=0
 game_name = logo
 game_name_rect = game_name.get_rect(center=(275,70))
@@ -64,16 +64,13 @@ score_message = text_font.render(f'Your score: {score}', False, (255, 255, 255))
 score_message_rect = score_message.get_rect(center=(270, 230))
 game_win=text_font.render("     Victory",False,(255,255,255))
 game_win_rect=game_win.get_rect(center=(200,200))
-#game_fps=text_font.render(f'FPS: {fps}',False,(255,255,255))
-#game_fps_rect=game_fps.get_rect(center=(100,100))
+
 
 l=input("Enter your name: ")
 score_msg=text_font.render(f'Hello:{l}',False,(255,255,255))
 score_msg_rect=score_msg.get_rect(center=(270,230))
 #Player
-'''player_surf = pygame.image.load('Enemies/mario_bros1.png').convert_alpha()
-player_rect = player_surf.get_rect(midbottom = (60,250))
-'''
+
 player_walk_1 = pygame.image.load('Enemies/mario_bros1.png').convert_alpha()
 player_walk_2 = pygame.image.load('Enemies/mario_bros_walk_2-removebg-preview.png').convert_alpha()
 player_walk = [player_walk_1,player_walk_2]
@@ -88,23 +85,14 @@ player_rectangle = player_surface.get_rect(midbottom = (60,250))
 goomba_surf = pygame.image.load('Enemies/enemies-removebg-preview.png').convert_alpha()
 goomba_rect = goomba_surf.get_rect(midbottom = (500,250))
 
-#Fireball
-#fireball_surf=pygame.image.load('Enemies/enemies-removebg-preview (1).png').convert_alpha()
-#fireball_rect=fireball_surf.get_rect(midbottom=(80,250))
-#Music
 bg_music.play(-1)
 
 #Koopa
 koopa_surf = pygame.image.load('Enemies/turtle 1.png').convert_alpha()
 koopa_rect = koopa_surf.get_rect(center=(605,180))
-#sc_rect_change=0
-#Timer
-#obstacle_rect_list =[]
-#Timer
-#obstacle_timer = pygame.USEREVENT + 1
-#pygame.time.set_timer(obstacle_timer,1500)
 
 while True:
+    map.blit(update_fps(), (200, 50))
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
@@ -112,24 +100,15 @@ while True:
             exit()
 
         if game_active:
-            fps()
             if event.type == pygame.KEYDOWN:
                 map_change = -2
                 if event.key == pygame.K_SPACE and player_rectangle.bottom >= 250:
                     player_gravity = -15
                     jump_music.play()
                 if event.key == pygame.K_a:
-                    #player_change = -4
                     map_change= 2
                 if event.key == pygame.K_d:
-                    #player_change = 4
                     map_change = -2
-                    #sc_rect_change=-2
-                #if event.key == pygame.K_w:
-                    #fireball_rect.x +=-3
-                    #fireball_left = -3
-                    #if fireball_rect.bottom>=250:fireball_rect.bottom==250
-                    #screen.blit(fireball_surf, fireball_rect)
 
         else:
             bg_music.stop()
@@ -141,11 +120,7 @@ while True:
     if game_active:
         score = display_score()
         player_animation()
-        #fps=fps()
-        #screen.blit(game_fps,game_fps_rect)
-        #map.blit(score_message,score_message_rect)
         map.blit(score_msg, score_msg_rect)
-        #screen.blit(game_fps,game_fps_rect)
         # collison
         if player_rectangle.colliderect(goomba_rect):
             goomba_rect.x = 550
@@ -158,7 +133,7 @@ while True:
                 game_over.play()
             bg_music.stop()
             pygame.time.delay(1500)
-        if score >= 40:
+        if score >= 32:
             game_active=False
             screen.blit(score_message, score_message_rect)
             screen.blit(game_win, game_win_rect)
@@ -171,13 +146,16 @@ while True:
             bg_music.stop()
             pygame.time.delay(2000)
 
-        #map.blit(game_fps, game_fps_rect)
         player_gravity += 1
         player_rectangle.x += player_change
         map_rect.x += map_change
         screen.blit(map, map_rect)
-        #fireball_left += 1
+        screen.blit(update_fps(),(10,0))
+        score_message = text_font.render(f'Score: {score}', False, (255, 255, 255))
+        score_message_rect = score_message.get_rect(center=(270, 50))
+        screen.blit(score_message,score_message_rect)
         player_rectangle.y += player_gravity
+
         if player_rectangle.bottom >= 250: player_rectangle.bottom = 250
         screen.blit(player_surface, player_rectangle)
         if player_rectangle.x >= 530:player_rectangle.x =530
@@ -189,7 +167,6 @@ while True:
         if koopa_rect.left <= -200:koopa_rect.left = 550
         screen.blit(koopa_surf,koopa_rect)
 
-
     else:
         screen.fill((255, 0, 0))
         screen.blit(player_surface, player_rectangle)
@@ -199,7 +176,6 @@ while True:
         game_win = text_font.render("     Victory", False, (255, 255, 255))
         game_win_rect = game_win.get_rect(center=(200, 200))
 
-
         if score == 0:
           screen.blit(game_message,game_message_rect)
 
@@ -208,7 +184,7 @@ while True:
           screen.blit(game_message, game_message_rect)
     pygame.display.update()
     clock.tick(60)
-    print(clock.get_fps())
+
 
 
 
